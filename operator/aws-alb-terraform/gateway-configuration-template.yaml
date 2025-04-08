@@ -1,0 +1,30 @@
+kind: GatewayConfiguration
+apiVersion: gateway-operator.konghq.com/v1beta1
+metadata:
+  name: "${ name }"
+  namespace: kong-gateways
+spec:
+  dataPlaneOptions:
+    network:
+      services:
+        ingress:
+          type: LoadBalancer
+          # type: ClusterIP
+    deployment:
+      podTemplateSpec:
+        spec:
+          containers:
+          - name: proxy
+            image: "kong/kong-gateway:${ version }"
+  controlPlaneOptions:
+    deployment:
+      podTemplateSpec:
+        spec:
+          containers:
+          - name: controller
+            image: kong/kubernetes-ingress-controller:3.4.3
+            env:
+            - name: CONTROLLER_LOG_LEVEL
+              value: debug
+            - name: CONTROLLER_INGRESS_CLASS
+              value: "${ name }"

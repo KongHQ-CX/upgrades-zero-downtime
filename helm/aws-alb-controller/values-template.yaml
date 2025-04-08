@@ -1,0 +1,134 @@
+image:
+  repository: "kong/kong-gateway"
+  tag: "${kong_version}"
+  pullPolicy: Always
+
+env:
+  database: "off"
+
+  # default kong_admin password
+  password: "K1ngK0ng"
+  enforce_rbac: "off"
+
+  tracing_instrumentations: "all"
+  tracing_sampling_rate: "1.0"
+  port_maps: "443:8443"
+
+replicaCount: 2
+
+proxy:
+  enabled: true
+  type: ClusterIP
+
+  http:
+    enabled: true
+    servicePort: 80
+    containerPort: 8000
+  tls:
+    enabled: true
+    servicePort: 443
+    containerPort: 8443
+  ingress:
+    enabled: true
+    path: "/"
+    pathType: "Prefix"
+    annotations:
+      kubernetes.io/ingress.class: "alb"
+      alb.ingress.kubernetes.io/load-balancer-attributes: "access_logs.s3.enabled=false"
+      alb.ingress.kubernetes.io/actions.ssl-redirect: |
+        {"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}
+      alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:eu-west-1:123456789012:certificate/32948f18-63d7-4ed9-9882-9448b81351a7"
+      alb.ingress.kubernetes.io/healthcheck-path: "/status/ready"
+      alb.ingress.kubernetes.io/healthcheck-protocol: "HTTP"
+      alb.ingress.kubernetes.io/healthcheck-port: "8100"
+      alb.ingress.kubernetes.io/listen-ports: "[{\"HTTPS\": 443}]"
+      alb.ingress.kubernetes.io/scheme: "internet-facing"
+      alb.ingress.kubernetes.io/target-type: "ip"
+      alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS-1-2-2017-01"
+      alb.ingress.kubernetes.io/success-codes: "200"
+      alb.ingress.kubernetes.io/load-balancer-name: "ko-kic"
+      alb.ingress.kubernetes.io/group.name: "ko-kic"
+      alb.ingress.kubernetes.io/inbound-cidrs: "0.0.0.0/0"
+
+admin:
+  enabled: false
+
+manager:
+  enabled: false
+
+portal:
+  enabled: false
+
+portalapi:
+  enabled: false
+
+cluster:
+  enabled: false
+
+clustertelemetry:
+  enabled: false
+
+livenessProbe:
+  failureThreshold: 10
+  httpGet:
+    path: /status
+    port: status
+    scheme: HTTP
+  initialDelaySeconds: 3
+  periodSeconds: 1
+  successThreshold: 1
+  timeoutSeconds: 2
+
+readinessProbe:
+  failureThreshold: 10
+  httpGet:
+    path: /status/ready
+    port: status
+    scheme: HTTP
+  initialDelaySeconds: 3
+  periodSeconds: 1
+  successThreshold: 1
+  timeoutSeconds: 2
+
+enterprise:
+  enabled: true
+  license_secret: kong-enterprise-license
+  vitals:
+    enabled: false
+  portal:
+    enabled: true
+  rbac:
+    enabled: false
+  smtp:
+    enabled: false
+
+postgresql:
+  enabled: false
+
+ingressController:
+  enabled: true
+  installCRDs: false
+  image:
+    # repository: kong/kubernetes-ingress-controller
+    tag: "3.4.3"
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /healthz
+      port: 10254
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+  readinessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /healthz
+      port: 10254
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1

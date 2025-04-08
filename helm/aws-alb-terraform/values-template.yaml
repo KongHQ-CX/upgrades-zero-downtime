@@ -1,0 +1,114 @@
+image:
+  repository: "kong/kong-gateway"
+  tag: "${kong_version}"
+  pullPolicy: Always
+
+env:
+  database: "off"
+
+  # default kong_admin password
+  password: "K1ngK0ng"
+  enforce_rbac: "off"
+
+  tracing_instrumentations: "all"
+  tracing_sampling_rate: "1.0"
+  port_maps: "443:8443"
+
+replicaCount: 2
+
+proxy:
+  enabled: true
+  type: ClusterIP
+
+  http:
+    enabled: true
+    servicePort: 80
+    containerPort: 8000
+  tls:
+    enabled: true
+    servicePort: 443
+    containerPort: 8443
+  ingress:
+    enabled: false
+
+admin:
+  enabled: false
+
+manager:
+  enabled: false
+
+portal:
+  enabled: false
+
+portalapi:
+  enabled: false
+
+cluster:
+  enabled: false
+
+clustertelemetry:
+  enabled: false
+
+livenessProbe:
+  failureThreshold: 10
+  httpGet:
+    path: /status
+    port: status
+    scheme: HTTP
+  initialDelaySeconds: 3
+  periodSeconds: 1
+  successThreshold: 1
+  timeoutSeconds: 2
+
+readinessProbe:
+  failureThreshold: 10
+  httpGet:
+    path: /status/ready
+    port: status
+    scheme: HTTP
+  initialDelaySeconds: 3
+  periodSeconds: 1
+  successThreshold: 1
+  timeoutSeconds: 2
+
+enterprise:
+  enabled: true
+  license_secret: kong-enterprise-license
+  vitals:
+    enabled: false
+  portal:
+    enabled: true
+  rbac:
+    enabled: false
+  smtp:
+    enabled: false
+
+postgresql:
+  enabled: false
+
+ingressController:
+  enabled: true
+  installCRDs: false
+  image:
+    # repository: kong/kubernetes-ingress-controller
+    tag: "3.4.3"
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /healthz
+      port: 10254
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+  readinessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /healthz
+      port: 10254
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
