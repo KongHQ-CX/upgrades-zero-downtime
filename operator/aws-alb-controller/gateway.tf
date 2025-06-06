@@ -2,7 +2,7 @@ resource "kubernetes_manifest" "gateway_configuration" {
   manifest = yamldecode(templatefile("gateway-configuration-template.yaml",
   {
     name = var.kong_gateway_name
-    version = "3.9"
+    version = "3.10"
   }))
 }
 

@@ -8,8 +8,8 @@ spec:
     network:
       services:
         ingress:
-          type: LoadBalancer
-          # type: ClusterIP
+          type: NodePort
+          name: "${ name }-proxy"
     deployment:
       podTemplateSpec:
         spec:
